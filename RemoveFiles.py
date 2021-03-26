@@ -2,18 +2,70 @@ import os
 import shutil
 import time
 
-path = input("Enter the path of directory")
+def main():
+    deleted_folders_count = 0
+    deleted_files_count = 0
+    path = input("Enter the path of directory to delete")
+    days = 30
+    seconds =  time.time() - (days*24*60*60)
 
-seconds =  time.time()
 if(os.path.exists(path)):
-    folder_name = os.walk(path)
+    for root_folder,folders,files in os.walk(path):
+        #comparing the days
+        if(seconds >= get_file_or_folder_age(root_folder)):
+            #removing the folder
+            remove_folder(root_folder)
+            deleted_folders_count = deleted_folders_count+1
 
-    os.path.join(path,folder_name)
+        else:
+            #checking folder from the root folder
+            for folder in folders:
+                #folder path
+                folder_path = os.path.join(root_folder,folder)
+                #comparing the days
+                if(seconds >= get_file_or_folder_age(root_folder)):
+                    #removing the folder
+                    remove_folder(root_folder)
+                    deleted_folders_count = deleted_folders_count+1
 
-    ctime = os.stat(path).st_ctime
-    return ctime
+            #checking the current directory files
+            for file in files:
+                #folder path
+                file_path = os.path.join(root_folder,file)
+                #comparing the days
+                if(seconds >= get_file_or_folder_age(file_path)):
+                    #removing the folder
+                    remove_file(file_path)
+                    deleted_files_count = deleted_files_count+1
 
-    if(seconds>ctime):
-        print("Greater")
+                else:
+                    #if the path is not  a directory
+                    if(seconds >= get_file_or_folder_age(file_path)):
+                    #removing the folder
+                    remove_file(file_path)
+                    deleted_files_count = deleted_files_count+1
+
 else:
-    print("Path not found")
+    print(f'"{path}" is not found')
+    deleted_files_count = deleted_files_count+1
+
+print(f"Total folders deleted: {deleted_folders_count}")
+print(f"Total files deleted: {deleted_files_count}")
+
+
+def remove_file(file_path):
+    os.remove(file_path)
+
+def remove_folder(root_folder):
+    shutil.rmtree(root_folder)
+    #folder_name = os.walk(path)
+
+    #os.path.join(path,folder_name)
+
+    #ctime = os.stat(path).st_ctime
+    #return ctime
+
+    #if(seconds>ctime):
+        #print("Greater")
+#else:
+    #print("Path not found")
